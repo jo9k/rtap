@@ -1,0 +1,223 @@
+# build unstable targets only with Unstable build types
+if((NOT JVX_DEPLOY_UNSTABLE) AND IS_UNSTABLE)
+  message("Excluding unstable target ${JVX_TARGET_NAME} from build.")
+  return()
+endif()
+
+###
+# reset some stuff
+###
+set(ADDITIONAL_CXX_FLAGS "")
+set(ADDITIONAL_LIBS "")
+set(ADDITIONAL_SOURCES "")
+set(ADDITIONAL_COMPILE_DEFINITIONS "")
+set(ADDITIONAL_LINKER_FLAGS "")
+set(GENERATED_FILES "")
+if(IS_UNSTABLE)
+  set(INSTALL_COMPONENT "unstable")
+else()
+  set(INSTALL_COMPONENT "release")
+endif()
+
+
+###
+# JVX Components are always built static AND shared
+###
+if(IS_JVX_COMPONENT)
+  set(BUILD_STATIC TRUE)
+  if(JVX_COMPONENT_ONLY_STATIC)
+    set(BUILD_SHARED FALSE)
+  else(JVX_COMPONENT_ONLY_STATIC)
+    if(NOT JVX_DISABLE_ALL_SHARED)
+      set(BUILD_SHARED TRUE)
+    else()
+      set(BUILD_SHARED FALSE)
+    endif()
+  endif(JVX_COMPONENT_ONLY_STATIC)
+endif()
+
+###
+# run PCG
+###
+if(LOCAL_PCG_FILES)
+  message("    > PCG")
+  file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/generated)
+  include_directories(${CMAKE_CURRENT_BINARY_DIR}/generated)
+  foreach(PCGFILE ${LOCAL_PCG_FILES})
+    get_filename_component(PCGDIR ${PCGFILE} DIRECTORY)
+    get_filename_component(PCGTOKEN ${PCGFILE} NAME_WE)
+    message("      ${PCGTOKEN}")
+    add_custom_command(
+      COMMAND ${JVX_PCG}
+      ARGS ${PCGDIR}/${PCGTOKEN}.pcg -o ${CMAKE_CURRENT_BINARY_DIR}/generated/pcg_${PCGTOKEN}.h
+      DEPENDS ${PCGDIR}/${PCGTOKEN}.pcg ${JVX_PCG}
+      OUTPUT  ${CMAKE_CURRENT_BINARY_DIR}/generated/pcg_${PCGTOKEN}.h)
+    set(GENERATED_FILES ${GENERATED_FILES} ${CMAKE_CURRENT_BINARY_DIR}/generated/pcg_${PCGTOKEN}.h)
+  endforeach()
+endif()
+
+###
+# run MCG
+###
+if(LOCAL_MCG_FILES)
+  message("    > MCG")
+  file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/generated)
+  include_directories(${CMAKE_CURRENT_BINARY_DIR}/generated)
+  foreach(MCGFILE ${LOCAL_MCG_FILES})
+    get_filename_component(MCGDIR ${MCGFILE} DIRECTORY)
+    get_filename_component(MCGTOKEN ${MCGFILE} NAME_WE)
+    message("      ${MCGTOKEN}")
+    add_custom_command(
+      COMMAND ${JVX_MCG}
+      ARGS ${MCGDIR}/${MCGTOKEN}.mcg --out-h ${CMAKE_CURRENT_BINARY_DIR}/generated/mcg_${MCGTOKEN}.h --out-hp ${CMAKE_CURRENT_BINARY_DIR}/generated/mcg_${MCGTOKEN}_prototypes.h
+      DEPENDS ${MCGDIR}/${MCGTOKEN}.mcg ${JVX_MCG}
+      OUTPUT  ${CMAKE_CURRENT_BINARY_DIR}/generated/mcg_${MCGTOKEN}.h ${CMAKE_CURRENT_BINARY_DIR}/generated/mcg_${MCGTOKEN}_prototypes.h)
+    set(GENERATED_FILES ${GENERATED_FILES} ${CMAKE_CURRENT_BINARY_DIR}/generated/mcg_${MCGTOKEN}.h)
+    set(GENERATED_FILES ${GENERATED_FILES} ${CMAKE_CURRENT_BINARY_DIR}/generated/mcg_${MCGTOKEN}_prototypes.h)
+  endforeach()
+endif()
+
+###
+# run octave
+###
+if(LOCAL_M_FILES)
+  message("    > Octave")
+  file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/generated)
+  include_directories(${CMAKE_CURRENT_BINARY_DIR}/generated)
+  foreach(MFILE ${LOCAL_M_FILES})
+    execute_process(COMMAND ${OCTAVE} -qf --no-gui ${MFILE} show_filename OUTPUT_VARIABLE OUTFILE)
+    string(REPLACE "\n" "" OUTFILE ${OUTFILE})
+    message("      ${MFILE} -> ${OUTFILE}")
+    add_custom_command(
+      COMMAND ${OCTAVE}
+      ARGS -q ${MFILE} ${CMAKE_CURRENT_BINARY_DIR}/generated
+      OUTPUT  ${CMAKE_CURRENT_BINARY_DIR}/generated/${OUTFILE}
+      DEPENDS ${MFILE} ${OCTAVE}
+      WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+    set(GENERATED_FILES ${GENERATED_FILES} ${CMAKE_CURRENT_BINARY_DIR}/generated/${OUTFILE})
+  endforeach()
+endif()
+
+###
+# static lib
+###
+if(BUILD_STATIC)
+	cuda_add_library(${JVX_TARGET_NAME_STATIC} SHARED ${LOCAL_SOURCES} ${ADDITIONAL_SOURCES} ${CUDA_SOURCES} ${GENERATED_FILES})
+
+   set(ADDITIONAL_COMPILE_DEFINITIONS_STATIC "${ADDITIONAL_COMPILE_DEFINITIONS}")
+
+	if(CUDA_USE_FFTW)
+		CUDA_ADD_CUFFT_TO_TARGET(${JVX_TARGET_NAME_STATIC})
+	endif(CUDA_USE_FFTW)
+
+  # Javox component libs get different compile definitions and a generated header
+  if(IS_JVX_COMPONENT)
+    message("    > Javox component library (static)")
+    set(ADDITIONAL_COMPILE_DEFINITIONS_STATIC "${ADDITIONAL_COMPILE_DEFINITIONS_STATIC} JVX_OBJECT_INIT_FUNCTION=${JVX_TARGET_NAME}_init;JVX_OBJECT_TERMINATE_FUNCTION=${JVX_TARGET_NAME}_terminate;JVX_MODULE_NAME=\"${JVX_MODULE_NAME}\"")
+    configure_file(${JVX_BASE_ROOT}/software/templates/objectAccess.h.in ${CMAKE_CURRENT_BINARY_DIR}/${JVX_TARGET_NAME}.h)
+  else()
+    message("    > Library (static)")
+  endif()
+
+  # set flags
+  target_compile_definitions(${JVX_TARGET_NAME_STATIC} PRIVATE ${LOCAL_COMPILE_DEFINITIONS} ${ADDITIONAL_COMPILE_DEFINITIONS_STATIC}  ${LOCAL_COMPILE_DEFINITIONS_STATIC})
+  if(IS_C_LIB)
+    set_target_properties(${JVX_TARGET_NAME_STATIC} PROPERTIES
+      COMPILE_FLAGS "${CMAKE_C_FLAGS} ${JVX_CMAKE_C_FLAGS_STATIC_PIC} ${LOCAL_C_FLAGS} ${ADDITIONAL_C_FLAGS}"
+      LINK_FLAGS "${CMAKE_STATIC_LINKER_FLAGS} ${JVX_CMAKE_LINKER_FLAGS_STATIC_PIC} ${LOCAL_LINKER_FLAGS} ${ADDITIONAL_LINKER_FLAGS}")
+  else()
+    set_target_properties(${JVX_TARGET_NAME_STATIC} PROPERTIES
+      COMPILE_FLAGS "${CMAKE_CXX_FLAGS} ${JVX_CMAKE_CXX_FLAGS_STATIC_PIC} ${LOCAL_CXX_FLAGS} ${ADDITIONAL_CXX_FLAGS}"
+      LINK_FLAGS "${CMAKE_STATIC_LINKER_FLAGS} ${JVX_CMAKE_LINKER_FLAGS_STATIC_PIC} ${LOCAL_LINKER_FLAGS} ${ADDITIONAL_LINKER_FLAGS}")
+  endif()
+  target_link_libraries(${JVX_TARGET_NAME_STATIC} ${LOCAL_LIBS} ${ADDITIONAL_LIBS})
+
+  jvx_displayFlags(${JVX_TARGET_NAME_STATIC})
+
+  # installation
+  if(IS_JVX_COMPONENT)
+  	if(JVX_RELEASE_SDK)
+		install(TARGETS ${JVX_TARGET_NAME_STATIC} DESTINATION ${INSTALL_PATH_COMPONENTS_STATIC})
+		install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${JVX_TARGET_NAME}.h DESTINATION ${INSTALL_PATH_INCLUDE_COMPONENTS_STATIC})
+		install(FILES ${LOCAL_ADDITIONAL_INSTALL_HEADERS} DESTINATION ${INSTALL_PATH_INCLUDE_COMPONENTS_STATIC})
+	endif()
+  else()
+    if(JVX_RELEASE_SDK)
+		install(TARGETS ${JVX_TARGET_NAME_STATIC} DESTINATION ${INSTALL_PATH_LIB_STATIC})
+		if(INSTALL_DEDICATED_INCLUDE_TREE)
+			install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/ DESTINATION ${INSTALL_PATH_INCLUDE_STATIC}/${JVX_TARGET_NAME} FILES_MATCHING PATTERN "*.h")
+			install(FILES ${LOCAL_ADDITIONAL_INSTALL_HEADERS} DESTINATION ${INSTALL_PATH_INCLUDE_STATIC}/${JVX_TARGET_NAME})
+		else()
+			install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/ DESTINATION ${INSTALL_PATH_INCLUDE_STATIC} FILES_MATCHING PATTERN "*.h")
+			install(FILES ${LOCAL_ADDITIONAL_INSTALL_HEADERS} DESTINATION ${INSTALL_PATH_INCLUDE_STATIC})
+		endif()
+	endif()
+  endif()
+
+endif()
+
+if(NOT JVX_RELEASE_SDK)
+	###
+	# shared lib
+	###
+	if(BUILD_SHARED)
+		cuda_add_library(${JVX_TARGET_NAME} SHARED ${LOCAL_SOURCES} ${ADDITIONAL_SOURCES} ${CUDA_SOURCES} ${GENERATED_FILES})
+
+		set(ADDITIONAL_COMPILE_DEFINITIONS_SHARED "${ADDITIONAL_COMPILE_DEFINITIONS}")
+
+		if(CUDA_USE_FFTW)
+			CUDA_ADD_CUFFT_TO_TARGET(${JVX_TARGET_NAME})
+		endif(CUDA_USE_FFTW)
+
+
+		# Javox component libs get different linker flags
+		if(IS_JVX_COMPONENT)
+			message("    > Javox component library (shared)")
+			set(ADDITIONAL_COMPILE_DEFINITIONS_SHARED "${ADDITIONAL_COMPILE_DEFINITIONS_SHARED};JVX_MODULE_NAME=\"${JVX_MODULE_NAME}\"")
+			set(ADDITIONAL_LINKER_FLAGS "${ADDITIONAL_LINKER_FLAGS} ${JVX_CMAKE_LINKER_FLAGS_SHARED_EXPORT_COMPONENTS}")
+		else()
+			message("    > Library (shared)")
+		endif()
+
+		# set flags
+		target_compile_definitions(${JVX_TARGET_NAME} PRIVATE "JVX_SHARED_LIB" ${LOCAL_COMPILE_DEFINITIONS} ${ADDITIONAL_COMPILE_DEFINITIONS_SHARED} ${LOCAL_COMPILE_DEFINITIONS_SHARED})
+		if(IS_C_LIB)
+			set_target_properties(${JVX_TARGET_NAME} PROPERTIES
+			COMPILE_FLAGS "${CMAKE_C_FLAGS} ${JVX_CMAKE_C_FLAGS_SHARED} ${LOCAL_C_FLAGS} ${ADDITIONAL_C_FLAGS}"
+			LINK_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${LOCAL_LINKER_FLAGS} ${ADDITIONAL_LINKER_FLAGS}")
+		else()
+			set_target_properties(${JVX_TARGET_NAME} PROPERTIES
+			COMPILE_FLAGS "${CMAKE_CXX_FLAGS} ${JVX_CMAKE_CXX_FLAGS_SHARED} ${LOCAL_CXX_FLAGS} ${ADDITIONAL_CXX_FLAGS}"
+			LINK_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${LOCAL_LINKER_FLAGS} ${ADDITIONAL_LINKER_FLAGS}")
+		endif()
+		target_link_libraries(${JVX_TARGET_NAME} ${JVX_SYSTEM_LIBRARIES} ${LOCAL_LIBS} ${ADDITIONAL_LIBS})
+
+		jvx_displayFlags(${JVX_TARGET_NAME})
+		
+		# installation
+		if(IS_JVX_COMPONENT)
+			install(TARGETS ${JVX_TARGET_NAME}
+			RUNTIME DESTINATION ${INSTALL_PATH_COMPONENTS_SHARED}
+			LIBRARY DESTINATION ${INSTALL_PATH_COMPONENTS_SHARED})
+		else()
+			install(TARGETS ${JVX_TARGET_NAME}
+				RUNTIME DESTINATION ${INSTALL_PATH_LIB_SHARED}
+				LIBRARY DESTINATION ${INSTALL_PATH_LIB_SHARED})
+		endif()
+	endif()
+endif()
+
+###
+# error
+###
+if(NOT BUILD_SHARED AND NOT BUILD_STATIC)
+  message(FATAL_ERROR "Library module must define BUILD_STATIC or BUILD_SHARED")
+endif()
+
+
+###
+# error
+###
+if(NOT BUILD_SHARED AND NOT BUILD_STATIC)
+  message(FATAL_ERROR "Library module must define BUILD_STATIC or BUILD_SHARED")
+endif()

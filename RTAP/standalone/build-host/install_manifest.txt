@@ -1,0 +1,2 @@
+H:/standalone/env-dbg/runtime/bin/jvxMyHost.exe
+H:/standalone/env-dbg/runtime/start-jvxMyHost.bat

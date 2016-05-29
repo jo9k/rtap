@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="H:\standalone\project\jvxAuNMyAlgorithm\target\componentEntry.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="H:\standalone\env-dbg\sdk\software\templates\jvxComponents\jvxAudioNodes\CjvxAudioNode.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="H:\standalone\project\jvxAuNMyAlgorithm\src\CjvxAuNMyAlgorithm.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="H:\standalone\build-algo\jvxAuNMyAlgorithm\generated\pcg_exports_node.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="H:\standalone\build-algo\jvxAuNMyAlgorithm\generated\pcg_CjvxAudioNode_pcg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="H:\standalone\project\jvxAuNMyAlgorithm\CMakeLists.txt" />
+    <CustomBuild Include="H:\standalone\build-algo\CMakeFiles\285bd17a6dc8e007e090600747596029\pcg_exports_node.h.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="H:\standalone\build-algo\CMakeFiles\285bd17a6dc8e007e090600747596029\pcg_CjvxAudioNode_pcg.h.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{E69F7F40-F58F-468A-A1A0-DD04296DB70C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{8DC91FD8-5C67-47BE-8CE1-43FC3F00913A}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{5769CF4C-9E73-43C0-8D83-748B173A6DD9}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

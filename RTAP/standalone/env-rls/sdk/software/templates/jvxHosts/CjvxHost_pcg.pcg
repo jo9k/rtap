@@ -1,0 +1,33 @@
+SECTION PROPERTIES
+{
+	OUTPUTFILE_NAME = "CjvxHost_genpcg";
+
+	SECTION properties_selected
+	{
+		NAME = "properties_selected"; 
+		DESCRIPTION = "Properties in state selected";
+		GENERATE_ENTRIES_CONFIG_FILE = "yes";        // Defaults to "no" if not present
+		GENERATE_ENTRIES_LINK_OBJECTS = "yes";       // Defaults to "no" if not present
+		COMMENT = " ---- Properties in state active ---";      // default in description if not specified
+		ALLOWED_STATE_MASK = {"JVX_STATE_SELECTED"};
+
+		SECTION component_path
+		{
+			NAME = "component_path";
+			ID = "jvx_component_path_str_list";						  // Defaults to section name if not present
+			DESCRIPTION = "List of paths to be searched for shared libraries";	  // Defaults to NAME if not present
+			CATEGORY = "JVX_PROPERTY_CATEGORY_PREDEFINED";
+			TYPE = "JVX_DATAFORMAT_STRING_LIST";
+		};
+
+		SECTION do_unload_dlls
+		{
+			NAME = "do_unload_dlls";
+			ID = "jvx_load_dlls_sellist";						  // Defaults to section name if not present
+			DESCRIPTION = "Property to allow dll load";	  // Defaults to NAME if not present
+			GENERATE_ENTRY_CONFIG_FILE = "no";
+			SELECTION_LIST_NAMES = {"allow"};
+			SELECTION_LIST_SELECTED = {"yes"};
+		};
+	};
+};

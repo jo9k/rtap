@@ -1,0 +1,71 @@
+
+ARCHITECTURE(ADSP-21369)
+
+//   Note: The SHARC 21369 has 2Mbit RAM and 6Mbit ROM in total.
+
+$OBJECTS = $COMMAND_LINE_OBJECTS;
+
+
+MEMORY
+{
+  seg_rth  { TYPE(PM RAM) START(0x00090000) END(0x000900ff) WIDTH(48) }
+  seg_pmco { TYPE(PM RAM) START(0x000902D0) END(0x000903FF) WIDTH(48) }
+  seg_pm64  { TYPE(PM RAM) START(0x0004c6c0) END(0x0004dfff) WIDTH(64)   }
+  seg_dm64  { TYPE(DM RAM) START(0x0005d800) END(0x0005d81f) WIDTH(64)   }
+  seg_pm40 { TYPE(PM RAM) START(0x00090400) END(0x000904ff) WIDTH(48) }
+  seg_dm40 { TYPE(DM RAM) START(0x000b0000) END(0x000b01ff) WIDTH(48) }
+  seg_pm32  { TYPE(PM RAM) START(0x00098c00) END(0x00098cff) WIDTH(32)}
+  seg_dm32  { TYPE(DM RAM) START(0x000b8400) END(0x000bafff) WIDTH(32)   }
+}
+
+
+PROCESSOR P0
+{
+	OUTPUT( $COMMAND_LINE_OUTPUT_FILE )
+    SECTIONS
+    {
+        // .text output section
+        seg_rth
+        {
+            INPUT_SECTIONS( $OBJECTS(seg_rth))
+        } > seg_rth
+
+
+        seg_pmco
+        {
+            INPUT_SECTIONS( $OBJECTS(seg_pmco) )
+        } > seg_pmco
+
+        seg_pm40
+        {
+            INPUT_SECTIONS( $OBJECTS(seg_pm40) )
+        } > seg_pm40
+
+        seg_dm40
+        {
+            INPUT_SECTIONS( $OBJECTS(seg_dm40) )
+        } > seg_dm40
+ 
+        seg_pm64
+        {
+            INPUT_SECTIONS( $OBJECTS(seg_pm64) )
+        } > seg_pm64
+
+        seg_dm64
+        {
+            INPUT_SECTIONS( $OBJECTS(seg_dm64) )
+        } > seg_dm64
+ 
+        seg_pm32
+        {
+            INPUT_SECTIONS( $OBJECTS(seg_pm32))
+        } >seg_pm32
+
+        seg_dm32
+        {
+            INPUT_SECTIONS( $OBJECTS(seg_dm32))
+        } >seg_dm32
+
+   }
+}
+

@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Form_myMainWidget</class>
+ <widget class="QWidget" name="Form_myMainWidget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1140</width>
+    <height>1116</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>1140</width>
+    <height>1116</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <widget class="QLabel" name="label_6">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>10</y>
+     <width>1121</width>
+     <height>34</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <pointsize>22</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string>MY CENTRAL WIDGET</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="lineEdit_ANGLE">
+   <property name="geometry">
+    <rect>
+     <x>510</x>
+     <y>80</y>
+     <width>113</width>
+     <height>20</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="lineEdit_CFAC">
+   <property name="geometry">
+    <rect>
+     <x>510</x>
+     <y>120</y>
+     <width>113</width>
+     <height>20</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label">
+   <property name="geometry">
+    <rect>
+     <x>380</x>
+     <y>80</y>
+     <width>121</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Paramater ANGLE</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_2">
+   <property name="geometry">
+    <rect>
+     <x>380</x>
+     <y>120</y>
+     <width>91</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Parameter CFAC</string>
+   </property>
+  </widget>
+ </widget>
+ <resources>
+  <include location="jvxMyNewHost.qrc"/>
+ </resources>
+ <connections>
+  <connection>
+   <sender>lineEdit_ANGLE</sender>
+   <signal>editingFinished()</signal>
+   <receiver>Form_myMainWidget</receiver>
+   <slot>onANGLE()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>593</x>
+     <y>89</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>681</x>
+     <y>60</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>lineEdit_CFAC</sender>
+   <signal>editingFinished()</signal>
+   <receiver>Form_myMainWidget</receiver>
+   <slot>onCFAC()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>562</x>
+     <y>126</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>680</x>
+     <y>164</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>automaticSteeringToggled(bool)</slot>
+  <slot>bypassToggled(bool)</slot>
+  <slot>onANGLE()</slot>
+  <slot>onCFAC()</slot>
+ </slots>
+</ui>

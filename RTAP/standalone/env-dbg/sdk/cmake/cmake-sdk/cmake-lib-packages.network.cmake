@@ -1,0 +1,6 @@
+	set(LOCAL_LIBS ${LOCAL_LIBS}
+		jvxLclient_st_static
+		${PCAP_LIBRARIES}
+		${PCAPPA_LIBRARIES}
+		${JVX_SOCKET_LIBRARIES}
+	)

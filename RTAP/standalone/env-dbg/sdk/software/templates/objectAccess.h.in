@@ -1,0 +1,10 @@
+#ifndef __@JVX_TARGET_NAME@_H__
+#define __@JVX_TARGET_NAME@_H__
+
+extern "C"
+{
+	jvxErrorType JVX_CALLINGCONVENTION @JVX_TARGET_NAME@_init(IjvxObject** retObject);
+	jvxErrorType JVX_CALLINGCONVENTION @JVX_TARGET_NAME@_terminate(IjvxObject* cls);
+}
+
+#endif
