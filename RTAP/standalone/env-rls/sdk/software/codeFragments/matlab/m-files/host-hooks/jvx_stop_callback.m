@@ -1,1 +1,0 @@
-function [hdl] = jvx_stop_callback(hdl)

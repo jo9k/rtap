@@ -1,7 +1,0 @@
-EXPORTS 
-
-		jvxInitObject
-		jvxTerminateObject
-		jvxDllProperties
-		jvxVersionString
-		
