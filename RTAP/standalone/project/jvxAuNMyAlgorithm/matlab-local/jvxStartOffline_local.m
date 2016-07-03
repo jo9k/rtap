@@ -31,6 +31,13 @@ function [ jvx_handle ] = jvxStartOffline_local( jvx_bsize_in, jvx_srate_in, jvx
 	% Restore private data in global data struct
 	inProcessing.jvx_handle = jvx_handle;
     
-    %%init algorithm
-    inProcessing.algo.ANGLE = 90;
-    inProcessing.algo.CFAC = 0.8;
+ %%init algorithm
+    inProcessing.algo.AZ = 1;
+    inProcessing.algo.EL = 1;
+    inProcessing.algo.R = 100;  %volume 1-100
+    inProcessing.algo.num = 0;
+    inProcessing.algo.leftbuffercut = zeros (1,576);
+    inProcessing.algo.rightbuffercut = zeros (1,576);
+    inProcessing.algo.HRTFs = load('HRIR_FULL2DEG.mat');
+    inProcessing.algo.HRTFs.HRIR_FULL2DEG=inProcessing.algo.HRTFs.HRIR_FULL2DEG.setDEG()
+
